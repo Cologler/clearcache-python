@@ -76,15 +76,12 @@ class Cache:
 
         def add(self, path):
             conf_file = get_conf_file()
-            if conf_file.is_file():
-                with conf_file.load_context(lock=True) as ctx:
-                    ctx.save_on_exit = True
-                    ctx.data['paths'].append(path)
-            else:
-                conf_file.get_parent().ensure_created()
-                conf_file.dump({
-                    'paths': [path]
-                })
+            conf_file.get_parent().ensure_created()
+            with conf_file.load_context(lock=True) as ctx:
+                ctx.save_on_exit = True
+                if ctx.data is None:
+                    ctx.data = {'paths': []}
+                ctx.data['paths'].append(path)
 
         def rm(self, path):
             conf_file = get_conf_file()
